@@ -4,14 +4,17 @@ import (
 	"html/template"
 	"net/http"
 	"fmt"
+	"log"
 
+    _ "github.com/lib/pq"
+    "github.com/jmoiron/sqlx"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
 
 func main() {
 	// database
-	db, err := sqlx.Connect("postgres", "user=luhmn dbname=luhmn sslmode=disable")
+	_, err := sqlx.Connect("postgres", "user=luhmn dbname=luhmn sslmode=disable")
     if err != nil {
         log.Fatalln(err)
     }
