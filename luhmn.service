@@ -1,0 +1,12 @@
+[Unit]
+Description=luhmn
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=3
+WorkingDirectory=/opt/apps/luhmn
+ExecStart=/opt/apps/luhmn/luhmn
+
+[Install]
+WantedBy=multi-user.target
