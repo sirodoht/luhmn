@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"fmt"
 	"log"
+	"os"
 
     _ "github.com/lib/pq"
     "github.com/jmoiron/sqlx"
@@ -12,14 +13,17 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-func main() {
-	// database
-	_, err := sqlx.Connect("postgres", "user=luhmn dbname=luhmn sslmode=disable")
+func databaseConnect() {
+	databaseUrl := os.Getenv("DATABASE_URL")
+	_, err := sqlx.Connect("postgres", databaseUrl)
     if err != nil {
         log.Fatalln(err)
     }
+}
 
-	// router
+func main() {
+	databaseConnect()
+
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.RedirectSlashes)
