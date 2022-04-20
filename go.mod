@@ -1,4 +1,4 @@
-module git.sr.ht/~sirodoht/luhmn
+module github.com/sirodoht/luhmn
 
 go 1.16
 
