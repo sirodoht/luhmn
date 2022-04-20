@@ -1,0 +1,2 @@
+export DATABASE_URL=postgres://luhmn:@localhost:5432/luhmn?sslmode=disable
+use nix
