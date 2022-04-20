@@ -1,21 +1,27 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"net/http"
+	"time"
 
-	"github.com/sirodoht/luhmn/database"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/sirodoht/luhmn/database"
 )
 
+type Document struct {
+	ID        int    `db:"id"`
+	CreatedAt string `db:"created_at"`
+}
+
 func main() {
-	database.Connect()
+	db := database.Connect()
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
-	r.Use(middleware.RedirectSlashes)
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		t, err := template.ParseFiles("templates/index.html")
@@ -25,7 +31,35 @@ func main() {
 		t.Execute(w, nil)
 	})
 
-	r.Get("/docs/", func(w http.ResponseWriter, r *http.Request) {
+	r.Post("/docs", func(w http.ResponseWriter, r *http.Request) {
+		type ReqBody struct {
+			Title string
+			Body  string
+		}
+		decoder := json.NewDecoder(r.Body)
+		var rb ReqBody
+		err := decoder.Decode(&rb)
+		if err != nil {
+			panic(err)
+		}
+
+		now := time.Now()
+		_, err = db.NamedExec(`INSERT INTO documents (title, body, created_at, updated_at) VALUES (:title, :body, :created_at, :updated_at)`,
+			map[string]interface{}{
+				"title":      rb.Title,
+				"body":       rb.Body,
+				"created_at": now,
+				"updated_at": now,
+			})
+		if err != nil {
+			panic(err)
+		}
+	})
+
+	r.Get("/docs", func(w http.ResponseWriter, r *http.Request) {
+		docs := []Document{}
+		db.Select(&docs, "SELECT * FROM documents ORDER BY id ASC")
+		fmt.Println(docs)
 		t, err := template.ParseFiles("templates/index.html")
 		if err != nil {
 			panic(err)
