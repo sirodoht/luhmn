@@ -9,7 +9,9 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/sirodoht/luhmn/database"
+	"github.com/jmoiron/sqlx"
+	"github.com/sirodoht/luhmn/document"
+	_ "github.com/lib/pq"
 )
 
 type Document struct {
@@ -18,7 +20,11 @@ type Document struct {
 }
 
 func main() {
-	db := database.Connect()
+	databaseUrl := os.Getenv("DATABASE_URL")
+	db, err := sqlx.Connect("postgres", databaseUrl)
+	if err != nil {
+		panic(err)
+	}
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
