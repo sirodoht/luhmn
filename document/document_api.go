@@ -1,12 +1,17 @@
 package document
 
 import (
+	"io/ioutil"
 	"database/sql"
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strconv"
 	"time"
+	"fmt"
+	"reflect"
 
+	"github.com/go-chi/chi/v5"
 	"go.uber.org/zap"
 )
 
@@ -50,6 +55,45 @@ func (api *API) InsertHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func (api *API) UpdateHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		api.logger.With(
+			zap.Error(err),
+		).Error("invalid id")
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	b, err := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	type ReqBody struct {
+		Title *string "json:title"
+		Body  *string "json:body"
+	}
+	var rb ReqBody
+	err = json.Unmarshal(b, &rb)
+	if err != nil {
+		api.logger.With(
+			zap.Error(err),
+		).Error("failed to parse input data")
+		w.WriteHeader(http.StatusBadGateway)
+		return
+	}
+	if rb.Title != nil {
+		api.store.Update(r.Context(), id, "title", *rb.Title)
+	}
+	if rb.Body != nil {
+		api.store.Update(r.Context(), id, "body", *rb.Body)
+	}
+	w.WriteHeader(http.StatusOK)
 }
 
 func (api *API) GetAllHandler(w http.ResponseWriter, r *http.Request) {

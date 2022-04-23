@@ -9,8 +9,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/jmoiron/sqlx"
-	"github.com/sirodoht/luhmn/document"
 	_ "github.com/lib/pq"
+	"github.com/sirodoht/luhmn/document"
 )
 
 func main() {
@@ -36,6 +36,7 @@ func main() {
 
 	r.Post("/docs", api.InsertHandler)
 	r.Get("/docs", api.GetAllHandler)
+	r.Patch("/docs/{id}", api.UpdateHandler)
 
 	fmt.Println("Listening on http://127.0.0.1:8000/")
 	http.ListenAndServe(":8000", r)
