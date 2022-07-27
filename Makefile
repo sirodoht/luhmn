@@ -1,10 +1,10 @@
 pginit:
 	PGDATA=postgres-data/ pg_ctl init
 	PGDATA=postgres-data/ pg_ctl start
-	createuser fdm
-	psql -U sirodoht -d postgres -c "ALTER USER fdm CREATEDB;"
-	psql -U fdm -d postgres -c "CREATE DATABASE fdm;"
-	psql -U fdm -d fdm -f schema.sql
+	createuser luhmn
+	psql -U sirodoht -d postgres -c "ALTER USER luhmn CREATEDB;"
+	psql -U luhmn -d postgres -c "CREATE DATABASE luhmn;"
+	psql -U luhmn -d luhmn -f schema.sql
 
 pgstart:
 	PGDATA=postgres-data/ pg_ctl start
