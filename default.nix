@@ -2,7 +2,8 @@ with (import <nixpkgs> {});
 mkShell {
   buildInputs = [
     postgresql_12
-    go_1_17
+    go
+    golangci-lint
   ];
   shellHook = ''
     export GOPATH="$(pwd)/go";
