@@ -8,8 +8,6 @@ import (
 	"net/http"
 	"strconv"
 	"time"
-	"fmt"
-	"reflect"
 
 	"github.com/go-chi/chi/v5"
 	"go.uber.org/zap"
@@ -110,6 +108,34 @@ func (api *API) GetAllHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	res, err := json.MarshalIndent(docs, "", "  ")
+	if err != nil {
+	}
+	w.Write(res)
+}
+
+func (api *API) GetOneHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		api.logger.With(
+			zap.Error(err),
+		).Error("invalid id")
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	doc, err := api.store.GetOne(r.Context(), id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		api.logger.With(
+			zap.Error(err),
+		).Error("failed to get document")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	res, err := json.MarshalIndent(doc, "", "  ")
 	if err != nil {
 	}
 	w.Write(res)

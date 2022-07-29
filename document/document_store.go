@@ -11,6 +11,7 @@ import (
 type Store interface {
 	Insert(context.Context, *Document) (int64, error)
 	GetAll(context.Context) ([]*Document, error)
+	GetOne(context.Context, int64) (*Document, error)
 	Update(context.Context, int64, string, string) (error)
 }
 
@@ -25,7 +26,8 @@ func NewSQLStore(db *sqlx.DB) *SQLStore {
 }
 
 func (s *SQLStore) Insert(ctx context.Context, d *Document) (int64, error) {
-	res, err := s.db.NamedExec(`
+	var id int64
+	rows, err := s.db.NamedQuery(`
 		INSERT INTO documents (
 			title,
 			body,
@@ -36,13 +38,12 @@ func (s *SQLStore) Insert(ctx context.Context, d *Document) (int64, error) {
 			:body,
 			:created_at,
 			:updated_at
-		)`, d)
+		) RETURNING id`, d)
 	if err != nil {
 		return 0, err
 	}
-	id, err := res.LastInsertId()
-	if err != nil {
-		return 0, err
+	if rows.Next() {
+		rows.Scan(&id)
 	}
 	return id, nil
 }
@@ -74,15 +75,15 @@ func (s *SQLStore) GetAll(ctx context.Context) ([]*Document, error) {
 }
 
 func (s *SQLStore) GetOne(ctx context.Context, id int64) (*Document, error) {
-	var doc *Document
+	var docs []*Document
 	err := s.db.SelectContext(
 		ctx,
-		&doc,
+		&docs,
 		`SELECT * FROM documents WHERE id=$1`,
 		id,
 	)
 	if err != nil {
 		return nil, err
 	}
-	return doc, nil
+	return docs[0], nil
 }

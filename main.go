@@ -37,6 +37,7 @@ func main() {
 	r.Post("/docs", api.InsertHandler)
 	r.Get("/docs", api.GetAllHandler)
 	r.Patch("/docs/{id}", api.UpdateHandler)
+	r.Get("/docs/{id}", api.GetOneHandler)
 
 	fmt.Println("Listening on http://127.0.0.1:8000/")
 	http.ListenAndServe(":8000", r)
